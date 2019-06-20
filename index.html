@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>欽ちゃんの仮装大賞パネルツール</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css" />
+    <style>
+      .is-center {
+        text-align: center;
+      }
+      .is-vertical-center {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+  </head>
+  <body>
+    <nav class="navbar is-warning" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand is-vertical-center">
+        <h1 class="title is-4">欽ちゃんの仮装大賞パネルツール</h1>
+      </div>
+    </nav>
+
+    <section class="section">
+      <div class="container is-center">
+        <canvas id="content" width="300" height="800"></canvas>
+        <script>
+          window.onload = () => {
+            const imgs = ["img/character.png", "img/frame.png", "img/rarity.png"]
+            const context = document.getElementById("content").getContext("2d")
+
+            const loadImage = url => {
+              return new Promise(resolve => {
+                const img = new Image()
+                img.onload = () => resolve(img)
+                img.src = url
+              })
+            }
+
+            Promise.all(imgs.map(loadImage)).then(imgs => {
+              imgs.forEach(img => {
+                context.drawImage(img, 0, 0, 300, 300)
+              })
+            })
+          }
+        </script>
+      </div>
+    </section>
+  </body>
+</html>
