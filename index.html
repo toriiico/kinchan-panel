@@ -28,7 +28,29 @@
         <canvas id="content" width="300" height="800"></canvas>
         <script>
           window.onload = () => {
-            const imgs = ["img/character.png", "img/frame.png", "img/rarity.png"]
+            const imgs = [
+              "img/base.png",
+              "img/1_d.png",
+              "img/2_d.png",
+              "img/3_d.png",
+              "img/4_d.png",
+              "img/5_d.png",
+              "img/6_d.png",
+              "img/7_d.png",
+              "img/8_d.png",
+              "img/9_d.png",
+              "img/10_d.png",
+              "img/11_d.png",
+              "img/12_d.png",
+              "img/13_d.png",
+              "img/14_d.png",
+              "img/15_d.png",
+              "img/16_d.png",
+              "img/17_d.png",
+              "img/18_d.png",
+              "img/19_d.png",
+              "img/20_d.png",
+            ]
             const context = document.getElementById("content").getContext("2d")
 
             const loadImage = url => {
@@ -41,7 +63,7 @@
 
             Promise.all(imgs.map(loadImage)).then(imgs => {
               imgs.forEach(img => {
-                context.drawImage(img, 0, 0, 300, 300)
+                context.drawImage(img, 0, 0, 160, 720)
               })
             })
           }
