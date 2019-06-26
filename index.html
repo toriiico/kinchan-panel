@@ -13,6 +13,14 @@
         display: flex;
         align-items: center;
       }
+      .canvas-wrapper {
+        position: relative;
+      }
+      .canvas-wrapper canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
     </style>
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   </head>
@@ -25,26 +33,31 @@
 
     <section class="section">
       <div class="container is-center">
-        <canvas id="content" width="300" height="720"></canvas>
+        <div class="canvas-wrapper">
+          <canvas id="content" width="160" height="720"></canvas>
+          <canvas id="contentFrameAnim" width="160" height="720"></canvas>
+        </div>
         <script>
           "use strict"
           const WIDTH = 160
           const HEIGHT = 720
 
           class PanelManager {
-            constructor(context) {
+            constructor(context, contextFrameAnim) {
               this.context = context
               this.imgInstance = new Image()
               this.count = 0
               this.frameAnim = {
+                context: contextFrameAnim,
                 instance: null,
+                img: new Image(),
                 step: 0,
                 maxStep: 6,
               }
-              this.frameAnimInstance = null
-              this.frameAnimCount = 1
-              this.frameAnimMax = 7
-              this.failTimer = null
+              this.failTimer = {
+                instance: null,
+                limit: 3000,
+              }
 
               this.imgs = {
                 bg: "img/base.png",
@@ -70,15 +83,6 @@
                   "img/19.png",
                   "img/20.png",
                 ],
-                // frameAnim: [
-                //   "img/kira_1.png",
-                //   "img/kira_2.png",
-                //   "img/kira_3.png",
-                //   "img/kira_4.png",
-                //   "img/kira_5.png",
-                //   "img/kira_6.png",
-                //   "img/kira_7.png",
-                // ],
                 frameAnim: "img/kira_sprites.png",
               }
               this.se = {
@@ -121,6 +125,7 @@
               }
 
               this.count++
+
               // サウンド再生
               this.se.numbers[this.count - 1].play()
 
@@ -129,29 +134,27 @@
 
               // 15点以上で合格サウンド
               if (this.count == 15) {
+                this.se.fail.pause()
+                this.se.fail.currentTime = 0
                 this.se.clear.play()
-                this.drawFrameAnim()
                 this.playFrameAnim()
               }
 
-              // 残念サウンド発生までのカウントを初期化
-              // setTimeout
+              // 残念サウンド
+              clearTimeout(this.failTimer.instance)
+              if (this.count < 15) {
+                this.failTimer.instance = setTimeout(() => {
+                  console.log("fail")
+                  this.se.fail.play()
+                }, this.failTimer.limit)
+              }
             }
-
-            // draw(path) {
-            //   this.imgInstance.onload = () => {
-            //     this.context.drawImage(this.imgInstance, 0, 0, WIDTH, HEIGHT)
-            //   }
-            //   this.imgInstance.src = path
-            // }
 
             draw(path) {
               return new Promise(resolve => {
-                console.log("これは？")
                 this.imgInstance.onload = () => resolve(this.imgInstance)
                 this.imgInstance.src = path
               }).then(resImg => {
-                console.log("こっち")
                 this.context.drawImage(resImg, 0, 0, WIDTH, HEIGHT)
               })
             }
@@ -170,16 +173,14 @@
 
             drawFrameAnim() {
               return new Promise(resolve => {
-                // new Image() は counterのimageと描画タイミングが被って描画されないバグ対策
-                const frameImg = new Image()
-                frameImg.onload = () => resolve(frameImg)
-                frameImg.src = this.imgs.frameAnim
+                this.frameAnim.img.onload = () => resolve(this.frameAnim.img)
+                this.frameAnim.img.src = this.imgs.frameAnim
               }).then(resImg => {
-                this.context.drawImage(
+                this.frameAnim.context.drawImage(
                   resImg,
                   WIDTH * this.frameAnim.step,
                   0,
-                  WIDTH * (this.frameAnim.step + 1),
+                  WIDTH,
                   HEIGHT,
                   0,
                   0,
@@ -191,35 +192,22 @@
 
             playFrameAnim() {
               this.frameAnim.instance = setInterval(() => {
-                console.log("toottayo")
-                console.log(this.frameAnim.step)
-                console.log(WIDTH * this.frameAnim.step)
+                this.frameAnim.context.clearRect(0, 0, WIDTH, HEIGHT)
+                this.drawFrameAnim()
+
                 if (this.frameAnim.step >= this.frameAnim.maxStep) {
                   this.frameAnim.step = 1
                 } else {
                   this.frameAnim.step++
                 }
-              }, 1000)
+              }, 50)
             }
           }
 
           window.onload = () => {
             const context = document.getElementById("content").getContext("2d")
-            const pm = new PanelManager(context)
-
-            // const loadImage = url => {
-            //   return new Promise(resolve => {
-            //     const img = new Image()
-            //     img.onload = () => resolve(img)
-            //     img.src = url
-            //   })
-            // }
-
-            // Promise.all(imgs.map(loadImage)).then(imgs => {
-            //   imgs.forEach(img => {
-            //     context.drawImage(img, 0, 0, 160, 720)
-            //   })
-            // })
+            const contextFrameAnim = document.getElementById("contentFrameAnim").getContext("2d")
+            const pm = new PanelManager(context, contextFrameAnim)
 
             document.addEventListener("keydown", e => {
               // Allow only specific keys
