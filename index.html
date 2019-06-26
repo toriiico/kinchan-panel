@@ -138,11 +138,22 @@
               // setTimeout
             }
 
+            // draw(path) {
+            //   this.imgInstance.onload = () => {
+            //     this.context.drawImage(this.imgInstance, 0, 0, WIDTH, HEIGHT)
+            //   }
+            //   this.imgInstance.src = path
+            // }
+
             draw(path) {
-              this.imgInstance.onload = e => {
-                this.context.drawImage(this.imgInstance, 0, 0, WIDTH, HEIGHT)
-              }
-              this.imgInstance.src = path
+              return new Promise(resolve => {
+                console.log("これは？")
+                this.imgInstance.onload = () => resolve(this.imgInstance)
+                this.imgInstance.src = path
+              }).then(resImg => {
+                console.log("こっち")
+                this.context.drawImage(resImg, 0, 0, WIDTH, HEIGHT)
+              })
             }
 
             drawBg() {
@@ -158,9 +169,14 @@
             }
 
             drawFrameAnim() {
-              this.imgInstance.onload = e => {
+              return new Promise(resolve => {
+                // new Image() は counterのimageと描画タイミングが被って描画されないバグ対策
+                const frameImg = new Image()
+                frameImg.onload = () => resolve(frameImg)
+                frameImg.src = this.imgs.frameAnim
+              }).then(resImg => {
                 this.context.drawImage(
-                  this.imgInstance,
+                  resImg,
                   WIDTH * this.frameAnim.step,
                   0,
                   WIDTH * (this.frameAnim.step + 1),
@@ -170,8 +186,7 @@
                   WIDTH,
                   HEIGHT
                 )
-              }
-              this.imgInstance.src = this.imgs.frameAnim
+              })
             }
 
             playFrameAnim() {
