@@ -28,11 +28,22 @@
         <canvas id="content" width="300" height="720"></canvas>
         <script>
           "use strict"
+          const WIDTH = 160
+          const HEIGHT = 720
 
           class PanelManager {
             constructor(context) {
               this.context = context
+              this.imgInstance = new Image()
               this.count = 0
+              this.frameAnim = {
+                instance: null,
+                step: 0,
+                maxStep: 6,
+              }
+              this.frameAnimInstance = null
+              this.frameAnimCount = 1
+              this.frameAnimMax = 7
               this.failTimer = null
 
               this.imgs = {
@@ -59,15 +70,16 @@
                   "img/19.png",
                   "img/20.png",
                 ],
-                frameAnim: [
-                  "img/kira_1.png",
-                  "img/kira_2.png",
-                  "img/kira_3.png",
-                  "img/kira_4.png",
-                  "img/kira_5.png",
-                  "img/kira_6.png",
-                  "img/kira_7.png",
-                ],
+                // frameAnim: [
+                //   "img/kira_1.png",
+                //   "img/kira_2.png",
+                //   "img/kira_3.png",
+                //   "img/kira_4.png",
+                //   "img/kira_5.png",
+                //   "img/kira_6.png",
+                //   "img/kira_7.png",
+                // ],
+                frameAnim: "img/kira_sprites.png",
               }
               this.se = {
                 numbers: [
@@ -118,6 +130,7 @@
               // 15点以上で合格サウンド
               if (this.count == 15) {
                 this.se.clear.play()
+                this.drawFrameAnim()
                 this.playFrameAnim()
               }
 
@@ -126,11 +139,10 @@
             }
 
             draw(path) {
-              const img = new Image()
-              img.onload = e => {
-                this.context.drawImage(img, 0, 0, 160, 720)
+              this.imgInstance.onload = e => {
+                this.context.drawImage(this.imgInstance, 0, 0, WIDTH, HEIGHT)
               }
-              img.src = path
+              this.imgInstance.src = path
             }
 
             drawBg() {
@@ -141,7 +153,39 @@
               this.draw(this.imgs.numbers[this.count - 1])
             }
 
-            playFrameAnim() {}
+            drawCount(count) {
+              this.draw(this.imgs.numbers[count - 1])
+            }
+
+            drawFrameAnim() {
+              this.imgInstance.onload = e => {
+                this.context.drawImage(
+                  this.imgInstance,
+                  WIDTH * this.frameAnim.step,
+                  0,
+                  WIDTH * (this.frameAnim.step + 1),
+                  HEIGHT,
+                  0,
+                  0,
+                  WIDTH,
+                  HEIGHT
+                )
+              }
+              this.imgInstance.src = this.imgs.frameAnim
+            }
+
+            playFrameAnim() {
+              this.frameAnim.instance = setInterval(() => {
+                console.log("toottayo")
+                console.log(this.frameAnim.step)
+                console.log(WIDTH * this.frameAnim.step)
+                if (this.frameAnim.step >= this.frameAnim.maxStep) {
+                  this.frameAnim.step = 1
+                } else {
+                  this.frameAnim.step++
+                }
+              }, 1000)
+            }
           }
 
           window.onload = () => {
