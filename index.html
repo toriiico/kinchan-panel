@@ -144,7 +144,6 @@
               clearTimeout(this.failTimer.instance)
               if (this.count < 15) {
                 this.failTimer.instance = setTimeout(() => {
-                  console.log("fail")
                   this.se.fail.play()
                 }, this.failTimer.limit)
               }
@@ -210,8 +209,12 @@
             const pm = new PanelManager(context, contextFrameAnim)
 
             document.addEventListener("keydown", e => {
-              // Allow only specific keys
-              pm.increment()
+              // key A, S, D
+              const keys = [65, 83, 68]
+
+              if (keys.indexOf(e.keyCode) >= 0) {
+                pm.increment()
+              }
             })
           }
         </script>
