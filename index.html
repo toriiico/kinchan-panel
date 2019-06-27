@@ -36,9 +36,17 @@
 
     <section class="section">
       <div class="container is-center">
-        <div class="canvas-wrapper">
-          <canvas id="content" width="160" height="720"></canvas>
-          <canvas id="contentFrameAnim" width="160" height="720"></canvas>
+        <div class="columns is-mobile">
+          <div class="column"></div>
+          <div class="canvas-wrapper">
+            <canvas id="content" width="160" height="720"></canvas>
+            <canvas id="contentFrameAnim" width="160" height="720"></canvas>
+          </div>
+          <div class="column" style="position: relative;">
+            <div style="bottom: 0; position: absolute;">
+              <button id="reset" class="button is-primary">リセット</button>
+            </div>
+          </div>
         </div>
         <script>
           "use strict"
@@ -118,6 +126,30 @@
               this.drawBg()
             }
 
+            clearSE() {
+              this.se.clear.pause()
+              this.se.clear.currentTime = 0
+              this.se.fail.pause()
+              this.se.fail.currentTime = 0
+
+              for (let i; i < this.se.numbers.length; i++) {
+                this.se.numbers[i].pause()
+                this.se.numbers[i].currentTime = 0
+              }
+              clearTimeout(this.failTimer.instance)
+            }
+
+            reset() {
+              console.log("reset")
+              this.clearSE()
+              this.clearAllCanvas()
+              clearInterval(this.frameAnim.instance)
+              this.count = 0
+              this.frameAnim.step = 0
+
+              this.drawBg()
+            }
+
             getCount() {
               return this.count
             }
@@ -192,9 +224,22 @@
               })
             }
 
+            clearAllCanvas() {
+              this.clearMainCanvas()
+              this.clearFrameAnimCanvas()
+            }
+
+            clearMainCanvas() {
+              this.context.clearRect(0, 0, WIDTH, HEIGHT)
+            }
+
+            clearFrameAnimCanvas() {
+              this.frameAnim.context.clearRect(0, 0, WIDTH, HEIGHT)
+            }
+
             playFrameAnim() {
               this.frameAnim.instance = setInterval(() => {
-                this.frameAnim.context.clearRect(0, 0, WIDTH, HEIGHT)
+                this.clearFrameAnimCanvas()
                 this.drawFrameAnim()
 
                 if (this.frameAnim.step >= this.frameAnim.maxStep) {
@@ -214,11 +259,25 @@
             document.addEventListener("keydown", e => {
               // key A, S, D
               const keys = [65, 83, 68]
+              console.log(e.keyCode)
 
-              if (keys.indexOf(e.keyCode) >= 0) {
-                pm.increment()
+              switch (e.keyCode) {
+                case 65: // 'A' key
+                case 83: // 'S' key
+                case 68: // 'D' key
+                  pm.increment()
+                  break
+                case 82: // 'R' key
+                  pm.reset()
+                  break
+                default:
+                  break
               }
             })
+
+            document.getElementById("reset").onclick = () => {
+              pm.reset()
+            }
           }
         </script>
       </div>
