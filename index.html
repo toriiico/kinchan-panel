@@ -30,258 +30,39 @@
   <body>
     <nav class="navbar is-warning" role="navigation" aria-label="main navigation">
       <div class="navbar-brand is-vertical-center">
-        <h1 class="title is-4">欽ちゃんの仮装大賞パネルツール</h1>
+        <h1 class="title is-4">欽ちゃんの仮装大賞パネルを再現してみた</h1>
       </div>
     </nav>
 
     <section class="section">
       <div class="container is-center">
         <div class="columns is-mobile">
-          <div class="column"></div>
+          <div class="column" style="position: relative;">
+            <div style="bottom: 0; position: absolute;"></div>
+          </div>
           <div class="canvas-wrapper">
             <canvas id="content" width="160" height="720"></canvas>
             <canvas id="contentFrameAnim" width="160" height="720"></canvas>
           </div>
           <div class="column" style="position: relative;">
             <div style="bottom: 0; position: absolute;">
-              <button id="reset" class="button is-primary">リセット</button>
+              <button id="help" class="button"><i class="far fa-question-circle"></i></button>
             </div>
           </div>
         </div>
-        <script>
-          "use strict"
-          const WIDTH = 160
-          const HEIGHT = 720
-
-          class PanelManager {
-            constructor(context, contextFrameAnim) {
-              this.context = context
-              this.imgInstance = new Image()
-              this.count = 0
-              this.frameAnim = {
-                context: contextFrameAnim,
-                instance: null,
-                img: new Image(),
-                step: 0,
-                maxStep: 6,
-              }
-              this.failTimer = {
-                instance: null,
-                limit: 3000,
-              }
-
-              this.imgs = {
-                bg: "img/base.png",
-                numbers: [
-                  "img/1.png",
-                  "img/2.png",
-                  "img/3.png",
-                  "img/4.png",
-                  "img/5.png",
-                  "img/6.png",
-                  "img/7.png",
-                  "img/8.png",
-                  "img/9.png",
-                  "img/10.png",
-                  "img/11.png",
-                  "img/12.png",
-                  "img/13.png",
-                  "img/14.png",
-                  "img/15.png",
-                  "img/16.png",
-                  "img/17.png",
-                  "img/18.png",
-                  "img/19.png",
-                  "img/20.png",
-                ],
-                frameAnim: "img/kira_sprites.png",
-              }
-              this.se = {
-                numbers: [
-                  new Audio("se/1.mp3"),
-                  new Audio("se/2.mp3"),
-                  new Audio("se/3.mp3"),
-                  new Audio("se/4.mp3"),
-                  new Audio("se/5.mp3"),
-                  new Audio("se/6.mp3"),
-                  new Audio("se/7.mp3"),
-                  new Audio("se/8.mp3"),
-                  new Audio("se/9.mp3"),
-                  new Audio("se/10.mp3"),
-                  new Audio("se/11.mp3"),
-                  new Audio("se/12.mp3"),
-                  new Audio("se/13.mp3"),
-                  new Audio("se/14.mp3"),
-                  new Audio("se/15.mp3"),
-                  new Audio("se/16.mp3"),
-                  new Audio("se/17.mp3"),
-                  new Audio("se/18.mp3"),
-                  new Audio("se/19.mp3"),
-                  new Audio("se/20.mp3"),
-                ],
-                clear: new Audio("se/clear.mp3"),
-                fail: new Audio("se/fail.mp3"),
-              }
-
-              this.drawBg()
-            }
-
-            clearSE() {
-              this.se.clear.pause()
-              this.se.clear.currentTime = 0
-              this.se.fail.pause()
-              this.se.fail.currentTime = 0
-
-              for (let i; i < this.se.numbers.length; i++) {
-                this.se.numbers[i].pause()
-                this.se.numbers[i].currentTime = 0
-              }
-              clearTimeout(this.failTimer.instance)
-            }
-
-            reset() {
-              console.log("reset")
-              this.clearSE()
-              this.clearAllCanvas()
-              clearInterval(this.frameAnim.instance)
-              this.count = 0
-              this.frameAnim.step = 0
-
-              this.drawBg()
-            }
-
-            getCount() {
-              return this.count
-            }
-
-            increment() {
-              if (this.count >= 20) {
-                return
-              }
-
-              this.count++
-
-              // サウンド再生
-              this.se.numbers[this.count - 1].play()
-
-              // 画像配置
-              this.drawNowCount()
-
-              // 15点以上で合格サウンド
-              if (this.count == 15) {
-                this.se.fail.pause()
-                this.se.fail.currentTime = 0
-                this.se.clear.play()
-                this.playFrameAnim()
-              }
-
-              // 残念サウンド
-              clearTimeout(this.failTimer.instance)
-              if (this.count < 15) {
-                this.failTimer.instance = setTimeout(() => {
-                  this.se.fail.play()
-                }, this.failTimer.limit)
-              }
-            }
-
-            draw(path) {
-              return new Promise(resolve => {
-                this.imgInstance.onload = () => resolve(this.imgInstance)
-                this.imgInstance.src = path
-              }).then(resImg => {
-                this.context.drawImage(resImg, 0, 0, WIDTH, HEIGHT)
-              })
-            }
-
-            drawBg() {
-              this.draw(this.imgs.bg)
-            }
-
-            drawNowCount() {
-              this.draw(this.imgs.numbers[this.count - 1])
-            }
-
-            drawCount(count) {
-              this.draw(this.imgs.numbers[count - 1])
-            }
-
-            drawFrameAnim() {
-              return new Promise(resolve => {
-                this.frameAnim.img.onload = () => resolve(this.frameAnim.img)
-                this.frameAnim.img.src = this.imgs.frameAnim
-              }).then(resImg => {
-                this.frameAnim.context.drawImage(
-                  resImg,
-                  WIDTH * this.frameAnim.step,
-                  0,
-                  WIDTH,
-                  HEIGHT,
-                  0,
-                  0,
-                  WIDTH,
-                  HEIGHT
-                )
-              })
-            }
-
-            clearAllCanvas() {
-              this.clearMainCanvas()
-              this.clearFrameAnimCanvas()
-            }
-
-            clearMainCanvas() {
-              this.context.clearRect(0, 0, WIDTH, HEIGHT)
-            }
-
-            clearFrameAnimCanvas() {
-              this.frameAnim.context.clearRect(0, 0, WIDTH, HEIGHT)
-            }
-
-            playFrameAnim() {
-              this.frameAnim.instance = setInterval(() => {
-                this.clearFrameAnimCanvas()
-                this.drawFrameAnim()
-
-                if (this.frameAnim.step >= this.frameAnim.maxStep) {
-                  this.frameAnim.step = 1
-                } else {
-                  this.frameAnim.step++
-                }
-              }, 50)
-            }
-          }
-
-          window.onload = () => {
-            const context = document.getElementById("content").getContext("2d")
-            const contextFrameAnim = document.getElementById("contentFrameAnim").getContext("2d")
-            const pm = new PanelManager(context, contextFrameAnim)
-
-            document.addEventListener("keydown", e => {
-              // key A, S, D
-              const keys = [65, 83, 68]
-              console.log(e.keyCode)
-
-              switch (e.keyCode) {
-                case 65: // 'A' key
-                case 83: // 'S' key
-                case 68: // 'D' key
-                  pm.increment()
-                  break
-                case 82: // 'R' key
-                  pm.reset()
-                  break
-                default:
-                  break
-              }
-            })
-
-            document.getElementById("reset").onclick = () => {
-              pm.reset()
-            }
-          }
-        </script>
       </div>
     </section>
+
+    <div class="modal">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <div class="notification">
+          加点：A S D キー
+          <br />
+          リセット：R キー
+        </div>
+      </div>
+    </div>
 
     <audio src="se/clear.mp3" preload="auto"></audio>
     <audio src="se/fail.mp3" preload="auto"></audio>
@@ -305,5 +86,231 @@
     <audio src="se/18.mp3" preload="auto"></audio>
     <audio src="se/19.mp3" preload="auto"></audio>
     <audio src="se/20.mp3" preload="auto"></audio>
+
+    <script>
+      "use strict"
+      const WIDTH = 160
+      const HEIGHT = 720
+
+      class PanelManager {
+        constructor(context, contextFrameAnim) {
+          this.context = context
+          this.imgInstance = new Image()
+          this.count = 0
+          this.frameAnim = {
+            context: contextFrameAnim,
+            instance: null,
+            img: new Image(),
+            step: 0,
+            maxStep: 6,
+          }
+          this.failTimer = {
+            instance: null,
+            limit: 3000,
+          }
+
+          this.imgs = {
+            bg: "img/base.png",
+            numbers: [
+              "img/1.png",
+              "img/2.png",
+              "img/3.png",
+              "img/4.png",
+              "img/5.png",
+              "img/6.png",
+              "img/7.png",
+              "img/8.png",
+              "img/9.png",
+              "img/10.png",
+              "img/11.png",
+              "img/12.png",
+              "img/13.png",
+              "img/14.png",
+              "img/15.png",
+              "img/16.png",
+              "img/17.png",
+              "img/18.png",
+              "img/19.png",
+              "img/20.png",
+            ],
+            frameAnim: "img/kira_sprites.png",
+          }
+          this.se = {
+            numbers: [
+              new Audio("se/1.mp3"),
+              new Audio("se/2.mp3"),
+              new Audio("se/3.mp3"),
+              new Audio("se/4.mp3"),
+              new Audio("se/5.mp3"),
+              new Audio("se/6.mp3"),
+              new Audio("se/7.mp3"),
+              new Audio("se/8.mp3"),
+              new Audio("se/9.mp3"),
+              new Audio("se/10.mp3"),
+              new Audio("se/11.mp3"),
+              new Audio("se/12.mp3"),
+              new Audio("se/13.mp3"),
+              new Audio("se/14.mp3"),
+              new Audio("se/15.mp3"),
+              new Audio("se/16.mp3"),
+              new Audio("se/17.mp3"),
+              new Audio("se/18.mp3"),
+              new Audio("se/19.mp3"),
+              new Audio("se/20.mp3"),
+            ],
+            clear: new Audio("se/clear.mp3"),
+            fail: new Audio("se/fail.mp3"),
+          }
+
+          this.drawBg()
+        }
+
+        clearSE() {
+          this.se.clear.pause()
+          this.se.clear.currentTime = 0
+          this.se.fail.pause()
+          this.se.fail.currentTime = 0
+
+          for (let i; i < this.se.numbers.length; i++) {
+            this.se.numbers[i].pause()
+            this.se.numbers[i].currentTime = 0
+          }
+          clearTimeout(this.failTimer.instance)
+        }
+
+        reset() {
+          this.clearSE()
+          this.clearAllCanvas()
+          clearInterval(this.frameAnim.instance)
+          this.count = 0
+          this.frameAnim.step = 0
+
+          this.drawBg()
+        }
+
+        getCount() {
+          return this.count
+        }
+
+        increment() {
+          if (this.count >= 20) {
+            return
+          }
+
+          this.count++
+
+          // サウンド再生
+          this.se.numbers[this.count - 1].play()
+
+          // 画像配置
+          this.drawNowCount()
+
+          // 15点以上で合格サウンド
+          if (this.count == 15) {
+            this.se.fail.pause()
+            this.se.fail.currentTime = 0
+            this.se.clear.play()
+            this.playFrameAnim()
+          }
+
+          // 残念サウンド
+          clearTimeout(this.failTimer.instance)
+          if (this.count < 15) {
+            this.failTimer.instance = setTimeout(() => {
+              this.se.fail.play()
+            }, this.failTimer.limit)
+          }
+        }
+
+        draw(path) {
+          return new Promise(resolve => {
+            this.imgInstance.onload = () => resolve(this.imgInstance)
+            this.imgInstance.src = path
+          }).then(resImg => {
+            this.context.drawImage(resImg, 0, 0, WIDTH, HEIGHT)
+          })
+        }
+
+        drawBg() {
+          this.draw(this.imgs.bg)
+        }
+
+        drawNowCount() {
+          this.draw(this.imgs.numbers[this.count - 1])
+        }
+
+        drawCount(count) {
+          this.draw(this.imgs.numbers[count - 1])
+        }
+
+        drawFrameAnim() {
+          return new Promise(resolve => {
+            this.frameAnim.img.onload = () => resolve(this.frameAnim.img)
+            this.frameAnim.img.src = this.imgs.frameAnim
+          }).then(resImg => {
+            this.frameAnim.context.drawImage(resImg, WIDTH * this.frameAnim.step, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT)
+          })
+        }
+
+        clearAllCanvas() {
+          this.clearMainCanvas()
+          this.clearFrameAnimCanvas()
+        }
+
+        clearMainCanvas() {
+          this.context.clearRect(0, 0, WIDTH, HEIGHT)
+        }
+
+        clearFrameAnimCanvas() {
+          this.frameAnim.context.clearRect(0, 0, WIDTH, HEIGHT)
+        }
+
+        playFrameAnim() {
+          this.frameAnim.instance = setInterval(() => {
+            this.clearFrameAnimCanvas()
+            this.drawFrameAnim()
+
+            if (this.frameAnim.step >= this.frameAnim.maxStep) {
+              this.frameAnim.step = 1
+            } else {
+              this.frameAnim.step++
+            }
+          }, 50)
+        }
+      }
+
+      window.onload = () => {
+        const context = document.getElementById("content").getContext("2d")
+        const contextFrameAnim = document.getElementById("contentFrameAnim").getContext("2d")
+        const pm = new PanelManager(context, contextFrameAnim)
+
+        document.addEventListener("keydown", e => {
+          // key A, S, D
+          const keys = [65, 83, 68]
+
+          switch (e.keyCode) {
+            case 65: // 'A' key
+            case 83: // 'S' key
+            case 68: // 'D' key
+              pm.increment()
+              break
+            case 82: // 'R' key
+              pm.reset()
+              break
+            default:
+              break
+          }
+        })
+
+        // modal
+        document.getElementById("help").onclick = () => {
+          document.getElementsByClassName("modal")[0].classList.add("is-active")
+        }
+
+        document.getElementsByClassName("modal-background")[0].onclick = () => {
+          document.getElementsByClassName("modal")[0].classList.remove("is-active")
+        }
+      }
+    </script>
   </body>
 </html>
