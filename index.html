@@ -30,7 +30,8 @@
   <body>
     <nav class="navbar is-warning" role="navigation" aria-label="main navigation">
       <div class="navbar-brand is-vertical-center">
-        <h1 class="title is-4">欽ちゃんの仮装大賞パネルを再現してみた</h1>
+        <h1 class="title is-4" style="margin: 0 12px 0 12px">欽ちゃんの仮装大賞パネルを再現してみた</h1>
+        <button id="help" class="button is-primary"><i class="far fa-question-circle"></i></button>
       </div>
     </nav>
 
@@ -44,11 +45,7 @@
             <canvas id="content" width="160" height="720"></canvas>
             <canvas id="contentFrameAnim" width="160" height="720"></canvas>
           </div>
-          <div class="column" style="position: relative;">
-            <div style="bottom: 0; position: absolute;">
-              <button id="help" class="button"><i class="far fa-question-circle"></i></button>
-            </div>
-          </div>
+          <div class="column"></div>
         </div>
       </div>
     </section>
@@ -57,9 +54,14 @@
       <div class="modal-background"></div>
       <div class="modal-content">
         <div class="notification">
+          操作方法
+          <br />
           加点：A S D キー
           <br />
           リセット：R キー
+          <br />
+          <br />
+          ※初回はリソース読み込みがうまくいかないことがあるので、一通り動かしてみたりページの再読込みをお試しください。
         </div>
       </div>
     </div>
