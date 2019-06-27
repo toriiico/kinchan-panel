@@ -28,6 +28,9 @@
         top: 0;
         left: 0;
       }
+      .is-hide {
+        display: none;
+      }
     </style>
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   </head>
@@ -49,8 +52,15 @@
             <canvas id="content" width="160" height="720"></canvas>
             <canvas id="contentFrameAnim" width="160" height="720"></canvas>
           </div>
-          <div class="column is-hidden-desktop">
-            これは
+          <div class="column">
+            <div id="helper-buttons" class="is-hide">
+              <div style="margin-bottom: 30px;">
+                <button id="reset" class="button">リセット</button>
+              </div>
+              <div>
+                <button id="increment" class="button is-primary">加点</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -65,6 +75,8 @@
           加点：A S D キー
           <br />
           リセット：R キー
+          <br />
+          <button id="show-helper-buttons" class="button is-primary">操作ボタンを表示・非表示</button>
           <br />
           <br />
           ※初回はリソース読み込みがうまくいかないことがあるので、一通り動かしてみたりページの再読込みをお試しください。
@@ -317,6 +329,26 @@
 
         document.getElementsByClassName("modal-background")[0].onclick = () => {
           document.getElementsByClassName("modal")[0].classList.remove("is-active")
+        }
+
+        // show helper buttons
+        document.getElementById("show-helper-buttons").onclick = () => {
+          const hideClassName = "is-hide"
+          const helperButtons = document.getElementById("helper-buttons")
+
+          if (helperButtons.classList.contains(hideClassName)) {
+            helperButtons.classList.remove(hideClassName)
+          } else {
+            helperButtons.classList.add(hideClassName)
+          }
+        }
+
+        // helper buttons
+        document.getElementById("increment").onclick = () => {
+          pm.increment()
+        }
+        document.getElementById("reset").onclick = () => {
+          pm.reset()
         }
       }
     </script>
