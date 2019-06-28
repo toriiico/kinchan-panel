@@ -1,4 +1,3 @@
 plugins:
   - jekyll-sitemap
   - jekyll-seo-tag
-google_analytics: UA-122581403-2
