@@ -64,7 +64,7 @@
       </div>
     </section>
 
-    <section id="main-section" class="section is-hide">
+    <section id="main-section" class="section">
       <div class="container is-center">
         <div class="columns is-mobile">
           <div class="column" style="position: relative;">
@@ -129,7 +129,6 @@
     <audio src="se/19.mp3" preload="auto"></audio>
     <audio src="se/20.mp3" preload="auto"></audio>
 
-    <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
     <script>
       "use strict"
       const WIDTH = 160
@@ -138,12 +137,9 @@
       class PanelManager {
         constructor(context, contextFrameAnim) {
           this.context = context
-          this.imgInstance = new Image()
           this.count = 0
           this.frameAnim = {
             context: contextFrameAnim,
-            instance: null,
-            img: new Image(),
             step: 0,
             maxStep: 6,
           }
@@ -153,30 +149,36 @@
           }
 
           this.imgs = {
-            bg: "img/base.png",
+            bg: {
+              instance: new Image(),
+              path: "img/base.png",
+            },
             numbers: [
-              "img/1.png",
-              "img/2.png",
-              "img/3.png",
-              "img/4.png",
-              "img/5.png",
-              "img/6.png",
-              "img/7.png",
-              "img/8.png",
-              "img/9.png",
-              "img/10.png",
-              "img/11.png",
-              "img/12.png",
-              "img/13.png",
-              "img/14.png",
-              "img/15.png",
-              "img/16.png",
-              "img/17.png",
-              "img/18.png",
-              "img/19.png",
-              "img/20.png",
+              { instance: new Image(), path: "img/1.png" },
+              { instance: new Image(), path: "img/2.png" },
+              { instance: new Image(), path: "img/3.png" },
+              { instance: new Image(), path: "img/4.png" },
+              { instance: new Image(), path: "img/5.png" },
+              { instance: new Image(), path: "img/6.png" },
+              { instance: new Image(), path: "img/7.png" },
+              { instance: new Image(), path: "img/8.png" },
+              { instance: new Image(), path: "img/9.png" },
+              { instance: new Image(), path: "img/10.png" },
+              { instance: new Image(), path: "img/11.png" },
+              { instance: new Image(), path: "img/12.png" },
+              { instance: new Image(), path: "img/13.png" },
+              { instance: new Image(), path: "img/14.png" },
+              { instance: new Image(), path: "img/15.png" },
+              { instance: new Image(), path: "img/16.png" },
+              { instance: new Image(), path: "img/17.png" },
+              { instance: new Image(), path: "img/18.png" },
+              { instance: new Image(), path: "img/19.png" },
+              { instance: new Image(), path: "img/20.png" },
             ],
-            frameAnim: "img/kira_sprites.png",
+            frameAnim: {
+              instance: new Image(),
+              path: "img/kira_sprites.png",
+            },
           }
           this.se = {
             numbers: [
@@ -212,11 +214,22 @@
 
         preloadImages() {
           const drawList = [this.imgs.bg, this.imgs.frameAnim, ...this.imgs.numbers]
+          let loadedCount = 0
 
-          let imgLoad = imagesLoaded(drawList)
-          imgLoad.on("done", instance => {
-            this.showContentDOM()
+          drawList.map(img => {
+            img.instance.onload = () => {
+              loadedCount++
+              if (loadedCount >= drawList.length) {
+                this.preloadSuccess()
+              }
+            }
+            img.instance.src = img.path
           })
+        }
+
+        preloadSuccess() {
+          this.showContentDOM()
+          this.drawBg()
         }
 
         showContentDOM() {
@@ -281,40 +294,34 @@
           }
         }
 
-        draw(path) {
-          this.imgInstance.onload = () => {
-            this.context.drawImage(this.imgInstance, 0, 0, WIDTH, HEIGHT)
-          }
-          this.imgInstance.src = path
+        draw(imgInstance) {
+          this.context.drawImage(imgInstance, 0, 0, WIDTH, HEIGHT)
         }
 
         drawBg() {
-          this.draw(this.imgs.bg)
+          this.draw(this.imgs.bg.instance)
         }
 
         drawNowCount() {
-          this.draw(this.imgs.numbers[this.count - 1])
+          this.draw(this.imgs.numbers[this.count - 1].instance)
         }
 
         drawCount(count) {
-          this.draw(this.imgs.numbers[count - 1])
+          this.draw(this.imgs.numbers[count - 1].instance)
         }
 
         drawFrameAnim() {
-          this.frameAnim.img.onload = () => {
-            this.frameAnim.context.drawImage(
-              this.frameAnim.img,
-              WIDTH * this.frameAnim.step,
-              0,
-              WIDTH,
-              HEIGHT,
-              0,
-              0,
-              WIDTH,
-              HEIGHT
-            )
-          }
-          this.frameAnim.img.src = this.imgs.frameAnim
+          this.frameAnim.context.drawImage(
+            this.imgs.frameAnim.instance,
+            WIDTH * this.frameAnim.step,
+            0,
+            WIDTH,
+            HEIGHT,
+            0,
+            0,
+            WIDTH,
+            HEIGHT
+          )
         }
 
         clearAllCanvas() {
