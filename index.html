@@ -56,7 +56,15 @@
       </div>
     </nav>
 
-    <section class="section">
+    <section id="progress-section" class="section">
+      <div class="container is-center">
+        <div class="is-mobile">
+          <progress class="progress is-primary" max="100"></progress>
+        </div>
+      </div>
+    </section>
+
+    <section id="main-section" class="section is-hide">
       <div class="container is-center">
         <div class="columns is-mobile">
           <div class="column" style="position: relative;">
@@ -121,6 +129,7 @@
     <audio src="se/19.mp3" preload="auto"></audio>
     <audio src="se/20.mp3" preload="auto"></audio>
 
+    <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
     <script>
       "use strict"
       const WIDTH = 160
@@ -196,10 +205,24 @@
             fail: new Audio("se/fail.mp3"),
           }
 
+          this.preloadImages()
+
           this.drawBg()
         }
 
-        preloadImages() {}
+        preloadImages() {
+          const drawList = [this.imgs.bg, this.imgs.frameAnim, ...this.imgs.numbers]
+
+          let imgLoad = imagesLoaded(drawList)
+          imgLoad.on("done", instance => {
+            this.showContentDOM()
+          })
+        }
+
+        showContentDOM() {
+          document.getElementById("progress-section").classList.add("is-hide")
+          document.getElementById("main-section").classList.remove("is-hide")
+        }
 
         clearSE() {
           this.se.clear.pause()
@@ -372,6 +395,10 @@
         document.getElementById("reset").onclick = () => {
           pm.reset()
         }
+      }
+      const showContent = () => {
+        document.getElementById("progress-section").classList.add("is-hide")
+        document.getElementById("main-section").classList.remove("is-hide")
       }
     </script>
   </body>
