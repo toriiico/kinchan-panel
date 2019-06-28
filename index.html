@@ -21,9 +21,9 @@
     />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css" />
     <style>
-		html {
-			touch-action: manipulation;
-		}
+      html {
+        touch-action: manipulation;
+      }
       .is-center {
         text-align: center;
       }
@@ -199,6 +199,8 @@
           this.drawBg()
         }
 
+        preloadImages() {}
+
         clearSE() {
           this.se.clear.pause()
           this.se.clear.currentTime = 0
@@ -257,12 +259,10 @@
         }
 
         draw(path) {
-          return new Promise(resolve => {
-            this.imgInstance.onload = () => resolve(this.imgInstance)
-            this.imgInstance.src = path
-          }).then(resImg => {
-            this.context.drawImage(resImg, 0, 0, WIDTH, HEIGHT)
-          })
+          this.imgInstance.onload = () => {
+            this.context.drawImage(this.imgInstance, 0, 0, WIDTH, HEIGHT)
+          }
+          this.imgInstance.src = path
         }
 
         drawBg() {
@@ -278,12 +278,20 @@
         }
 
         drawFrameAnim() {
-          return new Promise(resolve => {
-            this.frameAnim.img.onload = () => resolve(this.frameAnim.img)
-            this.frameAnim.img.src = this.imgs.frameAnim
-          }).then(resImg => {
-            this.frameAnim.context.drawImage(resImg, WIDTH * this.frameAnim.step, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT)
-          })
+          this.frameAnim.img.onload = () => {
+            this.frameAnim.context.drawImage(
+              this.frameAnim.img,
+              WIDTH * this.frameAnim.step,
+              0,
+              WIDTH,
+              HEIGHT,
+              0,
+              0,
+              WIDTH,
+              HEIGHT
+            )
+          }
+          this.frameAnim.img.src = this.imgs.frameAnim
         }
 
         clearAllCanvas() {
