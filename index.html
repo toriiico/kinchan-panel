@@ -100,7 +100,7 @@
           <br />
           <button id="show-helper-buttons" class="button is-primary">操作ボタンを表示・非表示</button>
           <br />
-          v0.0.4
+          v0.0.5
         </div>
       </div>
     </div>
@@ -123,7 +123,7 @@
             instance: null,
             limit: 3000,
           }
-          this.isFirstClicked = false
+          this.isLoadedSE = false // iPhoneなどリソース読み込みに一部制限があるもの向け
 
           this.imgs = {
             bg: {
@@ -184,6 +184,7 @@
             fail: new Audio("se/fail.mp3"),
           }
 
+          this.preloadSE()
           this.preloadImages()
 
           this.drawBg()
@@ -201,6 +202,13 @@
               }
             }
             img.instance.src = img.path
+          })
+        }
+
+        preloadSE() {
+          const seList = [this.se.clear, this.se.fail, ...this.se.numbers]
+          seList.map(se => {
+            se.load()
           })
         }
 
@@ -242,12 +250,6 @@
         }
 
         increment() {
-          if (!this.isFirstClicked) {
-            // NOTE: iOS特有のsetTimeout仕様対策
-            this.se.fail.load()
-            this.isFirstClicked = true
-          }
-
           if (this.count >= 20) {
             return
           }
@@ -368,6 +370,12 @@
 
         // show helper buttons
         document.getElementById("show-helper-buttons").onclick = () => {
+          // NOTE: iPhoneはイベント中でしかload, playを受け付けないため、事前load用の処理
+          if (!pm.isLoadedSE) {
+            pm.preloadSE()
+            pm.isLoadedSE = true
+          }
+
           const hideClassName = "is-hide"
           const helperButtons = document.getElementById("helper-buttons")
 
