@@ -128,6 +128,46 @@
 
     <script>
       "use strict"
+
+      var timeouts = {}
+      var intervals = {}
+      var orgSetTimeout = window.setTimeout
+      var orgSetInterval = window.setInterval
+      var orgClearTimeout = window.clearTimeout
+      var orgClearInterval = window.clearInterval
+
+      function createTimer(set, map, args) {
+        var id,
+          cb = args[0],
+          repeat = set === orgSetInterval
+
+        function callback() {
+          if (cb) {
+            cb.apply(window, arguments)
+
+            if (!repeat) {
+              delete map[id]
+              cb = null
+            }
+          }
+        }
+
+        args[0] = callback
+
+        id = set.apply(window, args)
+
+        map[id] = { args: args, created: Date.now(), cb: cb, id: id }
+
+        return id
+      }
+
+      window.setTimeout = function() {)
+        return createTimer(orgSetTimeout, timeouts, arguments)
+      }
+    </script>
+
+    <script>
+      "use strict"
       const WIDTH = 160
       const HEIGHT = 720
 
