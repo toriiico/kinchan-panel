@@ -100,73 +100,10 @@
           <br />
           <button id="show-helper-buttons" class="button is-primary">操作ボタンを表示・非表示</button>
           <br />
-          v0,0,1
+          v0.0.4
         </div>
       </div>
     </div>
-
-    <audio src="se/clear.mp3" preload="auto"></audio>
-    <audio src="se/fail.mp3" preload="auto"></audio>
-    <audio src="se/1.mp3" preload="auto"></audio>
-    <audio src="se/2.mp3" preload="auto"></audio>
-    <audio src="se/3.mp3" preload="auto"></audio>
-    <audio src="se/4.mp3" preload="auto"></audio>
-    <audio src="se/5.mp3" preload="auto"></audio>
-    <audio src="se/6.mp3" preload="auto"></audio>
-    <audio src="se/7.mp3" preload="auto"></audio>
-    <audio src="se/8.mp3" preload="auto"></audio>
-    <audio src="se/9.mp3" preload="auto"></audio>
-    <audio src="se/10.mp3" preload="auto"></audio>
-    <audio src="se/11.mp3" preload="auto"></audio>
-    <audio src="se/12.mp3" preload="auto"></audio>
-    <audio src="se/13.mp3" preload="auto"></audio>
-    <audio src="se/14.mp3" preload="auto"></audio>
-    <audio src="se/15.mp3" preload="auto"></audio>
-    <audio src="se/16.mp3" preload="auto"></audio>
-    <audio src="se/17.mp3" preload="auto"></audio>
-    <audio src="se/18.mp3" preload="auto"></audio>
-    <audio src="se/19.mp3" preload="auto"></audio>
-    <audio src="se/20.mp3" preload="auto"></audio>
-
-    <script>
-      "use strict"
-
-      var timeouts = {}
-      var intervals = {}
-      var orgSetTimeout = window.setTimeout
-      var orgSetInterval = window.setInterval
-      var orgClearTimeout = window.clearTimeout
-      var orgClearInterval = window.clearInterval
-
-      function createTimer(set, map, args) {
-        var id,
-          cb = args[0],
-          repeat = set === orgSetInterval
-
-        function callback() {
-          if (cb) {
-            cb.apply(window, arguments)
-
-            if (!repeat) {
-              delete map[id]
-              cb = null
-            }
-          }
-        }
-
-        args[0] = callback
-
-        id = set.apply(window, args)
-
-        map[id] = { args: args, created: Date.now(), cb: cb, id: id }
-
-        return id
-      }
-
-      window.setTimeout = function() {
-        return createTimer(orgSetTimeout, timeouts, arguments)
-      }
-    </script>
 
     <script>
       "use strict"
@@ -186,6 +123,7 @@
             instance: null,
             limit: 3000,
           }
+          this.isFirstClicked = false
 
           this.imgs = {
             bg: {
@@ -304,6 +242,12 @@
         }
 
         increment() {
+          if (!this.isFirstClicked) {
+            // NOTE: iOS特有のsetTimeout仕様対策
+            this.se.fail.load()
+            this.isFirstClicked = true
+          }
+
           if (this.count >= 20) {
             return
           }
