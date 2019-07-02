@@ -3,3 +3,5 @@ plugins:
   - jekyll-seo-tag
 
 theme: jekyll-theme-cayman
+
+google_analytics: UA-122581403-2

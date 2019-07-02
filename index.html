@@ -1,403 +1,356 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122581403-2"></script>
-    <script>
-      window.dataLayer = window.dataLayer || []
-      function gtag() {
-        dataLayer.push(arguments)
-      }
-      gtag("js", new Date())
+---
+layout: default
+---
 
-      gtag("config", "UA-122581403-2")
-    </script>
+<body>
+  <nav class="navbar is-warning" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand is-vertical-center">
+      <h1 class="title is-4" style="margin: 0 12px 0 12px">欽ちゃんの仮装大賞パネルを再現してみた</h1>
+      <button id="help" class="button is-primary"><i class="far fa-question-circle"></i></button>
+    </div>
+  </nav>
 
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>欽ちゃんの仮装大賞パネル 再現ツール</title>
-    <meta
-      name="description"
-      content="欽ちゃんの仮装大賞で使われていたパネルをweb上に再現してみました。操作方法は A S D キーで加点、R キーでリセットできます。"
-    />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css" />
-    <style>
-      html {
-        touch-action: manipulation;
-      }
-      .is-center {
-        text-align: center;
-      }
-      .is-vertical-center {
-        display: flex;
-        align-items: center;
-      }
-      .canvas-wrapper {
-        position: relative;
-        width: 160px;
-        height: 720px;
-        margin: auto;
-      }
-      .canvas-wrapper canvas {
-        position: absolute;
-        top: 0;
-        left: 0;
-      }
-      .is-hide {
-        display: none;
-      }
-    </style>
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-  </head>
-  <body>
-    <nav class="navbar is-warning" role="navigation" aria-label="main navigation">
-      <div class="navbar-brand is-vertical-center">
-        <h1 class="title is-4" style="margin: 0 12px 0 12px">欽ちゃんの仮装大賞パネルを再現してみた</h1>
-        <button id="help" class="button is-primary"><i class="far fa-question-circle"></i></button>
+  <section id="progress-section" class="section">
+    <div class="container is-center">
+      <div class="is-mobile">
+        <progress class="progress is-primary" max="100"></progress>
       </div>
-    </nav>
+    </div>
+  </section>
 
-    <section id="progress-section" class="section">
-      <div class="container is-center">
-        <div class="is-mobile">
-          <progress class="progress is-primary" max="100"></progress>
+  <section id="main-section" class="section">
+    <div class="container is-center">
+      <div class="columns is-mobile">
+        <div class="column" style="position: relative;">
+          <div style="bottom: 0; position: absolute;"></div>
         </div>
-      </div>
-    </section>
-
-    <section id="main-section" class="section">
-      <div class="container is-center">
-        <div class="columns is-mobile">
-          <div class="column" style="position: relative;">
-            <div style="bottom: 0; position: absolute;"></div>
-          </div>
-          <div class="canvas-wrapper">
-            <canvas id="content" width="160" height="720"></canvas>
-            <canvas id="contentFrameAnim" width="160" height="720"></canvas>
-          </div>
-          <div class="column">
-            <div id="helper-buttons" class="is-hide">
-              <div style="margin-bottom: 30px;">
-                <button id="reset" class="button">リセット</button>
-              </div>
-              <div>
-                <button id="increment" class="button is-primary">加点</button>
-              </div>
+        <div class="canvas-wrapper">
+          <canvas id="contentMain" width="160" height="720"></canvas>
+          <canvas id="contentFrameAnim" width="160" height="720"></canvas>
+        </div>
+        <div class="column">
+          <div id="helper-buttons" class="is-hide">
+            <div style="margin-bottom: 30px;">
+              <button id="reset" class="button">リセット</button>
+            </div>
+            <div>
+              <button id="increment" class="button is-primary">加点</button>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <div class="modal">
-      <div class="modal-background"></div>
-      <div class="modal-content">
-        <div class="notification">
-          操作方法
-          <br />
-          加点：A S D キー
-          <br />
-          リセット：R キー
-          <br />
-          <button id="show-helper-buttons" class="button is-primary">操作ボタンを表示・非表示</button>
-          <br />
-          v0.0.5
-        </div>
+  <div class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+      <div class="notification">
+        操作方法
+        <br />
+        加点：A S D キー
+        <br />
+        リセット：R キー
+        <br />
+        <button id="show-helper-buttons" class="button is-primary">操作ボタンを表示・非表示</button>
+        <br />
+        v0.0.5
       </div>
     </div>
+  </div>
 
-    <script>
-      "use strict"
-      const WIDTH = 160
-      const HEIGHT = 720
+  <script>
+    "use strict"
+    const WIDTH = 160
+    const HEIGHT = 720
 
-      class PanelManager {
-        constructor(context, contextFrameAnim) {
-          this.context = context
-          this.count = 0
-          this.frameAnim = {
-            context: contextFrameAnim,
-            step: 0,
-            maxStep: 6,
-          }
-          this.failTimer = {
-            instance: null,
-            limit: 3000,
-          }
-          this.isLoadedSE = false // iPhoneなどリソース読み込みに一部制限があるもの向け
+    class PanelManager {
+      constructor(context, contextFrameAnim) {
+        this.context = context
+        this.count = 0
+        this.frameAnim = {
+          context: contextFrameAnim,
+          step: 0,
+          maxStep: 6,
+        }
+        this.failTimer = {
+          instance: null,
+          limit: 3000,
+        }
+        this.isLoadedSE = false // iPhoneなどリソース読み込みに一部制限があるもの向け
 
-          this.imgs = {
-            bg: {
-              instance: new Image(),
-              path: "img/base.png",
-            },
-            numbers: [
-              { instance: new Image(), path: "img/1.png" },
-              { instance: new Image(), path: "img/2.png" },
-              { instance: new Image(), path: "img/3.png" },
-              { instance: new Image(), path: "img/4.png" },
-              { instance: new Image(), path: "img/5.png" },
-              { instance: new Image(), path: "img/6.png" },
-              { instance: new Image(), path: "img/7.png" },
-              { instance: new Image(), path: "img/8.png" },
-              { instance: new Image(), path: "img/9.png" },
-              { instance: new Image(), path: "img/10.png" },
-              { instance: new Image(), path: "img/11.png" },
-              { instance: new Image(), path: "img/12.png" },
-              { instance: new Image(), path: "img/13.png" },
-              { instance: new Image(), path: "img/14.png" },
-              { instance: new Image(), path: "img/15.png" },
-              { instance: new Image(), path: "img/16.png" },
-              { instance: new Image(), path: "img/17.png" },
-              { instance: new Image(), path: "img/18.png" },
-              { instance: new Image(), path: "img/19.png" },
-              { instance: new Image(), path: "img/20.png" },
-            ],
-            frameAnim: {
-              instance: new Image(),
-              path: "img/kira_sprites.png",
-            },
-          }
-          this.se = {
-            numbers: [
-              new Audio("se/1.mp3"),
-              new Audio("se/2.mp3"),
-              new Audio("se/3.mp3"),
-              new Audio("se/4.mp3"),
-              new Audio("se/5.mp3"),
-              new Audio("se/6.mp3"),
-              new Audio("se/7.mp3"),
-              new Audio("se/8.mp3"),
-              new Audio("se/9.mp3"),
-              new Audio("se/10.mp3"),
-              new Audio("se/11.mp3"),
-              new Audio("se/12.mp3"),
-              new Audio("se/13.mp3"),
-              new Audio("se/14.mp3"),
-              new Audio("se/15.mp3"),
-              new Audio("se/16.mp3"),
-              new Audio("se/17.mp3"),
-              new Audio("se/18.mp3"),
-              new Audio("se/19.mp3"),
-              new Audio("se/20.mp3"),
-            ],
-            clear: new Audio("se/clear.mp3"),
-            fail: new Audio("se/fail.mp3"),
-          }
-
-          this.preloadSE()
-          this.preloadImages()
-
-          this.drawBg()
+        this.imgs = {
+          bg: {
+            instance: new Image(),
+            path: "img/base.png",
+          },
+          numbers: [
+            { instance: new Image(), path: "img/1.png" },
+            { instance: new Image(), path: "img/2.png" },
+            { instance: new Image(), path: "img/3.png" },
+            { instance: new Image(), path: "img/4.png" },
+            { instance: new Image(), path: "img/5.png" },
+            { instance: new Image(), path: "img/6.png" },
+            { instance: new Image(), path: "img/7.png" },
+            { instance: new Image(), path: "img/8.png" },
+            { instance: new Image(), path: "img/9.png" },
+            { instance: new Image(), path: "img/10.png" },
+            { instance: new Image(), path: "img/11.png" },
+            { instance: new Image(), path: "img/12.png" },
+            { instance: new Image(), path: "img/13.png" },
+            { instance: new Image(), path: "img/14.png" },
+            { instance: new Image(), path: "img/15.png" },
+            { instance: new Image(), path: "img/16.png" },
+            { instance: new Image(), path: "img/17.png" },
+            { instance: new Image(), path: "img/18.png" },
+            { instance: new Image(), path: "img/19.png" },
+            { instance: new Image(), path: "img/20.png" },
+          ],
+          frameAnim: {
+            instance: new Image(),
+            path: "img/kira_sprites.png",
+          },
+        }
+        this.se = {
+          numbers: [
+            new Audio("se/1.mp3"),
+            new Audio("se/2.mp3"),
+            new Audio("se/3.mp3"),
+            new Audio("se/4.mp3"),
+            new Audio("se/5.mp3"),
+            new Audio("se/6.mp3"),
+            new Audio("se/7.mp3"),
+            new Audio("se/8.mp3"),
+            new Audio("se/9.mp3"),
+            new Audio("se/10.mp3"),
+            new Audio("se/11.mp3"),
+            new Audio("se/12.mp3"),
+            new Audio("se/13.mp3"),
+            new Audio("se/14.mp3"),
+            new Audio("se/15.mp3"),
+            new Audio("se/16.mp3"),
+            new Audio("se/17.mp3"),
+            new Audio("se/18.mp3"),
+            new Audio("se/19.mp3"),
+            new Audio("se/20.mp3"),
+          ],
+          clear: new Audio("se/clear.mp3"),
+          fail: new Audio("se/fail.mp3"),
         }
 
-        preloadImages() {
-          const drawList = [this.imgs.bg, this.imgs.frameAnim, ...this.imgs.numbers]
-          let loadedCount = 0
+        this.preloadSE()
+        this.preloadImages()
 
-          drawList.map(img => {
-            img.instance.onload = () => {
-              loadedCount++
-              if (loadedCount >= drawList.length) {
-                this.preloadSuccess()
-              }
-            }
-            img.instance.src = img.path
-          })
-        }
-
-        preloadSE() {
-          const seList = [this.se.clear, this.se.fail, ...this.se.numbers]
-          seList.map(se => {
-            se.load()
-          })
-        }
-
-        preloadSuccess() {
-          this.showContentDOM()
-          this.drawBg()
-        }
-
-        showContentDOM() {
-          document.getElementById("progress-section").classList.add("is-hide")
-          document.getElementById("main-section").classList.remove("is-hide")
-        }
-
-        clearSE() {
-          this.se.clear.pause()
-          this.se.clear.currentTime = 0
-          this.se.fail.pause()
-          this.se.fail.currentTime = 0
-
-          for (let i; i < this.se.numbers.length; i++) {
-            this.se.numbers[i].pause()
-            this.se.numbers[i].currentTime = 0
-          }
-          clearTimeout(this.failTimer.instance)
-        }
-
-        reset() {
-          this.clearSE()
-          this.clearAllCanvas()
-          clearInterval(this.frameAnim.instance)
-          this.count = 0
-          this.frameAnim.step = 0
-
-          this.drawBg()
-        }
-
-        getCount() {
-          return this.count
-        }
-
-        increment() {
-          if (this.count >= 20) {
-            return
-          }
-
-          this.count++
-
-          // サウンド再生
-          this.se.numbers[this.count - 1].play()
-
-          // 画像配置
-          this.drawNowCount()
-
-          // 15点以上で合格サウンド
-          if (this.count == 15) {
-            this.se.fail.pause()
-            this.se.fail.currentTime = 0
-            this.se.clear.play()
-            this.playFrameAnim()
-          }
-
-          // 残念サウンド
-          clearTimeout(this.failTimer.instance)
-          if (this.count < 15) {
-            this.failTimer.instance = setTimeout(() => {
-              this.se.fail.play()
-            }, this.failTimer.limit)
-          }
-        }
-
-        draw(imgInstance) {
-          this.context.drawImage(imgInstance, 0, 0, WIDTH, HEIGHT)
-        }
-
-        drawBg() {
-          this.draw(this.imgs.bg.instance)
-        }
-
-        drawNowCount() {
-          this.draw(this.imgs.numbers[this.count - 1].instance)
-        }
-
-        drawCount(count) {
-          this.draw(this.imgs.numbers[count - 1].instance)
-        }
-
-        drawFrameAnim() {
-          this.frameAnim.context.drawImage(
-            this.imgs.frameAnim.instance,
-            WIDTH * this.frameAnim.step,
-            0,
-            WIDTH,
-            HEIGHT,
-            0,
-            0,
-            WIDTH,
-            HEIGHT
-          )
-        }
-
-        clearAllCanvas() {
-          this.clearMainCanvas()
-          this.clearFrameAnimCanvas()
-        }
-
-        clearMainCanvas() {
-          this.context.clearRect(0, 0, WIDTH, HEIGHT)
-        }
-
-        clearFrameAnimCanvas() {
-          this.frameAnim.context.clearRect(0, 0, WIDTH, HEIGHT)
-        }
-
-        playFrameAnim() {
-          this.frameAnim.instance = setInterval(() => {
-            this.clearFrameAnimCanvas()
-            this.drawFrameAnim()
-
-            if (this.frameAnim.step >= this.frameAnim.maxStep) {
-              this.frameAnim.step = 1
-            } else {
-              this.frameAnim.step++
-            }
-          }, 50)
-        }
+        this.drawBg()
       }
 
-      window.onload = () => {
-        const context = document.getElementById("content").getContext("2d")
-        const contextFrameAnim = document.getElementById("contentFrameAnim").getContext("2d")
-        const pm = new PanelManager(context, contextFrameAnim)
+      preloadImages() {
+        const drawList = [this.imgs.bg, this.imgs.frameAnim, ...this.imgs.numbers]
+        let loadedCount = 0
 
-        document.addEventListener("keydown", e => {
-          // key A, S, D
-          const keys = [65, 83, 68]
-
-          switch (e.keyCode) {
-            case 65: // 'A' key
-            case 83: // 'S' key
-            case 68: // 'D' key
-              pm.increment()
-              break
-            case 82: // 'R' key
-              pm.reset()
-              break
-            default:
-              break
+        drawList.map(img => {
+          img.instance.onload = () => {
+            loadedCount++
+            if (loadedCount >= drawList.length) {
+              this.preloadSuccess()
+            }
           }
+          img.instance.src = img.path
         })
-
-        // modal
-        document.getElementById("help").onclick = () => {
-          document.getElementsByClassName("modal")[0].classList.add("is-active")
-        }
-
-        document.getElementsByClassName("modal-background")[0].onclick = () => {
-          document.getElementsByClassName("modal")[0].classList.remove("is-active")
-        }
-
-        // show helper buttons
-        document.getElementById("show-helper-buttons").onclick = () => {
-          // NOTE: iPhoneはイベント中でしかload, playを受け付けないため、事前load用の処理
-          if (!pm.isLoadedSE) {
-            pm.preloadSE()
-            pm.isLoadedSE = true
-          }
-
-          const hideClassName = "is-hide"
-          const helperButtons = document.getElementById("helper-buttons")
-
-          if (helperButtons.classList.contains(hideClassName)) {
-            helperButtons.classList.remove(hideClassName)
-          } else {
-            helperButtons.classList.add(hideClassName)
-          }
-        }
-
-        // helper buttons
-        document.getElementById("increment").onclick = () => {
-          pm.increment()
-        }
-        document.getElementById("reset").onclick = () => {
-          pm.reset()
-        }
       }
-      const showContent = () => {
+
+      preloadSE() {
+        const seList = [this.se.clear, this.se.fail, ...this.se.numbers]
+        seList.map(se => {
+          se.load()
+        })
+      }
+
+      preloadSuccess() {
+        this.showContentDOM()
+        this.drawBg()
+      }
+
+      showContentDOM() {
         document.getElementById("progress-section").classList.add("is-hide")
         document.getElementById("main-section").classList.remove("is-hide")
       }
-    </script>
-  </body>
-</html>
+
+      clearSE() {
+        this.se.clear.pause()
+        this.se.clear.currentTime = 0
+        this.se.fail.pause()
+        this.se.fail.currentTime = 0
+
+        for (let i; i < this.se.numbers.length; i++) {
+          this.se.numbers[i].pause()
+          this.se.numbers[i].currentTime = 0
+        }
+        clearTimeout(this.failTimer.instance)
+      }
+
+      reset() {
+        this.clearSE()
+        this.clearAllCanvas()
+        clearInterval(this.frameAnim.instance)
+        this.count = 0
+        this.frameAnim.step = 0
+
+        this.drawBg()
+      }
+
+      getCount() {
+        return this.count
+      }
+
+      increment() {
+        if (this.count >= 20) {
+          return
+        }
+
+        this.count++
+
+        // サウンド再生
+        this.se.numbers[this.count - 1].play()
+
+        // 画像配置
+        this.drawNowCount()
+
+        // 15点以上で合格サウンド
+        if (this.count == 15) {
+          this.se.fail.pause()
+          this.se.fail.currentTime = 0
+          this.se.clear.play()
+          this.playFrameAnim()
+        }
+
+        // 残念サウンド
+        clearTimeout(this.failTimer.instance)
+        if (this.count < 15) {
+          this.failTimer.instance = setTimeout(() => {
+            this.se.fail.play()
+          }, this.failTimer.limit)
+        }
+      }
+
+      draw(imgInstance) {
+        this.context.drawImage(imgInstance, 0, 0, WIDTH, HEIGHT)
+      }
+
+      drawBg() {
+        this.draw(this.imgs.bg.instance)
+      }
+
+      drawNowCount() {
+        this.draw(this.imgs.numbers[this.count - 1].instance)
+      }
+
+      drawCount(count) {
+        this.draw(this.imgs.numbers[count - 1].instance)
+      }
+
+      drawFrameAnim() {
+        this.frameAnim.context.drawImage(
+          this.imgs.frameAnim.instance,
+          WIDTH * this.frameAnim.step,
+          0,
+          WIDTH,
+          HEIGHT,
+          0,
+          0,
+          WIDTH,
+          HEIGHT
+        )
+      }
+
+      clearAllCanvas() {
+        this.clearMainCanvas()
+        this.clearFrameAnimCanvas()
+      }
+
+      clearMainCanvas() {
+        this.context.clearRect(0, 0, WIDTH, HEIGHT)
+      }
+
+      clearFrameAnimCanvas() {
+        this.frameAnim.context.clearRect(0, 0, WIDTH, HEIGHT)
+      }
+
+      playFrameAnim() {
+        this.frameAnim.instance = setInterval(() => {
+          this.clearFrameAnimCanvas()
+          this.drawFrameAnim()
+
+          if (this.frameAnim.step >= this.frameAnim.maxStep) {
+            this.frameAnim.step = 1
+          } else {
+            this.frameAnim.step++
+          }
+        }, 50)
+      }
+    }
+
+    window.onload = () => {
+      const context = document.getElementById("contentMain").getContext("2d")
+      const contextFrameAnim = document.getElementById("contentFrameAnim").getContext("2d")
+      const pm = new PanelManager(context, contextFrameAnim)
+
+      document.addEventListener("keydown", e => {
+        // key A, S, D
+        const keys = [65, 83, 68]
+
+        switch (e.keyCode) {
+          case 65: // 'A' key
+          case 83: // 'S' key
+          case 68: // 'D' key
+            pm.increment()
+            break
+          case 82: // 'R' key
+            pm.reset()
+            break
+          default:
+            break
+        }
+      })
+
+      // modal
+      document.getElementById("help").onclick = () => {
+        document.getElementsByClassName("modal")[0].classList.add("is-active")
+      }
+
+      document.getElementsByClassName("modal-background")[0].onclick = () => {
+        document.getElementsByClassName("modal")[0].classList.remove("is-active")
+      }
+
+      // show helper buttons
+      document.getElementById("show-helper-buttons").onclick = () => {
+        // NOTE: iPhoneはイベント中でしかload, playを受け付けないため、事前load用の処理
+        if (!pm.isLoadedSE) {
+          pm.preloadSE()
+          pm.isLoadedSE = true
+        }
+
+        const hideClassName = "is-hide"
+        const helperButtons = document.getElementById("helper-buttons")
+
+        if (helperButtons.classList.contains(hideClassName)) {
+          helperButtons.classList.remove(hideClassName)
+        } else {
+          helperButtons.classList.add(hideClassName)
+        }
+      }
+
+      // helper buttons
+      document.getElementById("increment").onclick = () => {
+        pm.increment()
+      }
+      document.getElementById("reset").onclick = () => {
+        pm.reset()
+      }
+    }
+    const showContent = () => {
+      document.getElementById("progress-section").classList.add("is-hide")
+      document.getElementById("main-section").classList.remove("is-hide")
+    }
+  </script>
+</body>
