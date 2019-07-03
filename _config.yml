@@ -4,4 +4,6 @@ plugins:
 
 theme: jekyll-theme-cayman
 
+title: 欽ちゃんの仮装大賞パネル 再現ツール
+description: 欽ちゃんの仮装大賞で使われていたパネルをweb上に再現してみました。操作方法は A S D キーで加点、R キーでリセットできます。
 google_analytics: UA-122581403-2
