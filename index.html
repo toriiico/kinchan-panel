@@ -368,11 +368,13 @@ layout: default
       }
 
       // events.
-      document.getElementById("increment").onclick = () => {
+      document.getElementById("increment").onclick = (e) => {
         pm.increment()
+        e.currentTarget.blur()
       }
-      document.getElementById("reset").onclick = () => {
+      document.getElementById("reset").onclick = (e) => {
         pm.reset()
+        e.currentTarget.blur()
       }
       document.getElementById("volumeRange").onchange = (e) => {
         const volume = e.target.value * 0.1
