@@ -319,6 +319,8 @@ layout: default
       const pm = new PanelManager(context, contextFrameAnim)
 
       document.addEventListener("keydown", (e) => {
+        e.preventDefault()
+
         // key A, S, D
         const keys = [65, 83, 68]
 
