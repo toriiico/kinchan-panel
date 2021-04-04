@@ -2,3 +2,5 @@
 vendor/*
 _site/*
 .sass-cache/*
+
+local/*
